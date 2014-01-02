@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDECodeSnippetCompletionPrefix</key>
+	<string>imagesize</string>
+	<key>IDECodeSnippetCompletionScopes</key>
+	<array>
+		<string>All</string>
+	</array>
+	<key>IDECodeSnippetContents</key>
+	<string>@interface UIImage (ResizeImage)
+	
+	- (UIImage *)imageScaledToSize:(CGSize)size;
+	
+	- (BOOL)hasAlpha;
+	
+	- (UIImage *)imageWithAlpha;
+	
+	@end
+	
+	@implementation UIImage (ResizeImage)
+	
+	- (UIImage *)imageScaledToSize:(CGSize)size
+	{
+	
+	  if (UIGraphicsBeginImageContextWithOptions != NULL) {
+	    UIGraphicsBeginImageContextWithOptions(size, NO, 0.0);
+	  } else {
+	    UIGraphicsBeginImageContext(size);
+	  }
+	  
+	  [self drawInRect:CGRectMake(0.0, 0.0, size.width, size.height)];
+	  
+	  UIImage *result = UIGraphicsGetImageFromCurrentImageContext();
+	  UIGraphicsEndImageContext();
+	  
+	  return result;
+	}
+	
+	// Checking alpha channel availability
+	- (BOOL)hasAlpha
+	{
+	  CGImageAlphaInfo alpha = CGImageGetAlphaInfo(self.CGImage);
+	  return (alpha == kCGImageAlphaFirst ||
+	          alpha == kCGImageAlphaLast ||
+	          alpha == kCGImageAlphaPremultipliedFirst ||
+	          alpha == kCGImageAlphaPremultipliedLast);
+	}
+	
+	// Applying alpha channel to image
+	- (UIImage *)imageWithAlpha
+	{
+	  if ([self hasAlpha]) {
+	    return self;
+	  }
+	  
+	  CGImageRef imageRef = self.CGImage;
+	  size_t width = CGImageGetWidth(imageRef);
+	  size_t height = CGImageGetHeight(imageRef);
+	  
+	  // The bitsPerComponent and bitmapInfo values are hard-coded to prevent an &quot;unsupported parameter combination&quot; error
+	  CGContextRef offscreenContext = CGBitmapContextCreate(NULL, width, height, 8, 0, CGImageGetColorSpace(imageRef), kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedFirst);
+	  
+	  CGContextDrawImage(offscreenContext, CGRectMake(0, 0, width, height), imageRef);
+	  CGImageRef imageRefWithAlpha = CGBitmapContextCreateImage(offscreenContext);
+	  UIImage *imageWithAlpha = [UIImage imageWithCGImage:imageRefWithAlpha];
+	  
+	  CGContextRelease(offscreenContext);
+	  CGImageRelease(imageRefWithAlpha);
+	  
+	  return imageWithAlpha;
+	  
+	}
+	
+	@end</string>
+	<key>IDECodeSnippetIdentifier</key>
+	<string>BBF5F93B-CE86-4B50-8312-AF5371D51F90</string>
+	<key>IDECodeSnippetLanguage</key>
+	<string>Xcode.SourceCodeLanguage.Objective-C</string>
+	<key>IDECodeSnippetSummary</key>
+	<string>重设图片大小和透明度（image）</string>
+	<key>IDECodeSnippetTitle</key>
+	<string>Resize UIImage and Alpha Category</string>
+	<key>IDECodeSnippetUserSnippet</key>
+	<true/>
+	<key>IDECodeSnippetVersion</key>
+	<integer>2</integer>
+</dict>
+</plist>
